@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+    <script src="/socket.io/socket.io.js"></script>
+    <!-- 输入内容 -->
+    <input id="input1" type="text" placeholder="输入你的内容"/>
+    <!-- 发送 -->
+    <button id="button1">发送信息</button>
+    <!-- 显示结果 -->
+    <div id="div1"></div>
+    <!-- <button>发送请求</button> -->
+    <script>
+        
+        var input = document.getElementById("input1")
+        var button = document.getElementById("button1")
+        var div = document.getElementById("div1")
+        const TYPE_ENTER = 0
+        const TYPE_LEAVE = 1
+        const TYPE_MSG = 2
+        var socket = new WebSocket('ws://localhost:3333')
+        socket.addEventListener('open',function(){
+            div.innerHTML = "连接服务成功了"
+        })
+        // 主动给websocket服务发送消息
+        button.addEventListener('click',function(){
+            var value = input.value
+            socket.send(value)
+            input.value = ''
+        })
+        // 接受websocket服务的数据
+        socket.addEventListener('message',function(e){
+            let data = JSON.parse(e.data)
+            // console.log(e.data)
+            // div.innerHTML = e.data
+            let dv = document.createElement('div')
+            dv.innerText = data.msg+"---"+data.time
+            if(data.type === TYPE_ENTER){
+                dv.style.color = "green"
+            }else if(data.type === TYPE_LEAVE){
+                dv.style.color = "red"
+            }else{
+                dv.style.color = "blue"
+            }
+            div.appendChild(dv)
+        })
+        socket.addEventListener('close',function(){
+            div.innerHTML = "服务断开连接"
+        })
+    </script>
+</body>
+</html>
